@@ -5,7 +5,7 @@ metadata:
 spec:
   containers:
   - name: my-container
-    image: rockylinux:8
+    image: centos:7
     command: ["/bin/sh"]
     args: ["-c", "while true; do sleep 10; done"]
     resources:
