@@ -1,0 +1,27 @@
+rbac:
+  create: false
+  pspEnabled: false
+  pspUseAppArmor: false
+
+serviceAccount:
+  create: false
+  name: default-full-access-mounted
+
+ingress:
+  enabled: true
+  path: "/"
+  hosts: 
+    - <project name>-grafana.diamond.ac.uk
+  tls:
+  - hosts:
+    - <project name>-grafana.diamond.ac.uk
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+    - name: Prometheus
+      type: prometheus
+      # Assuming that the prometheus helm release name is prom-<project-name>.
+      url: http://thanos-<projectname>-query-frontend:9090
+      isDefault: true

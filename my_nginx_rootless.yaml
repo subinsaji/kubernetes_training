@@ -1,0 +1,74 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-beacon
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-beacon
+  template:
+    metadata:
+      labels:
+        app: nginx-beacon
+    spec:
+      containers:
+      - name: nginx-beacon
+        image: nginxinc/nginx-unprivileged:latest
+        securityContext:
+          capabilities:
+            drop:
+              - NET_RAW
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+        resources:
+          limits:
+            cpu: "1"
+            memory: 300M
+        volumeMounts:
+          - mountPath: /tmp
+            name: tmp
+        ports:
+          - name: http
+            containerPort: 8080
+      volumes:
+        - emptyDir: {}
+          name: tmp
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-svc-beacon 
+spec:
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: nginx-beacon
+  type: ClusterIP
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: beacon
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - beacon.diamond.ac.uk
+  rules:
+  - host: beacon.diamond.ac.uk
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-svc-beacon # this must match the name of the service you want to target
+            port:
+              number: 8080

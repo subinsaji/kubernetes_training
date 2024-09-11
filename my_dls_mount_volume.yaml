@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  securityContext: # will apply to all containers in the pod
+    runAsUser: 22222
+    runAsGroup: 2222
+    supplementalGroups:
+      - 3333
+  volumes:
+    - name: dls
+      hostPath:
+        path: /dls
+        type: Directory
+  containers:
+  - name: my-container
+    securityContext:
+      privileged: false
+    image: busybox
+    command: ["/bin/sh"]
+    args: ["-c", "while true; do sleep 10; done"]
+    volumeMounts:
+      - mountPath: /dls
+        name: dls
+        mountPropagation: HostToContainer
